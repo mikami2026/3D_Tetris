@@ -1,84 +1,99 @@
 # 3D Tetris
 
-4×4 の正方形を底面に持つ縦長のピットに、立方体4個からなるピースを落として積む3Dパズルゲーム。
-カメラを 90° 単位で回して**4方向から盤面を確認**でき、操作は常に「今見えている向き」が基準になります。
+**[▶ Play in your browser](https://mikami2026.github.io/3D_Tetris/)**
 
-![プレイ画面](docs/screenshot.png)
+A 3D falling-block puzzle. Pieces made of four cubes drop into a tall pit with a 4×4 floor.
+You can **turn the camera 90° at a time to inspect the board from all four sides**, and the
+controls always follow whichever direction you are currently looking from.
 
-## 特徴
+[日本語版 README](README.ja.md)
 
-- **4方向視点** — `Q` / `E` でカメラが 90° 回転。盤面は動かず、カメラだけが回ります。操作の左右も視点に追従します
-- **8種のテトラキューブ** — 3Dでは鏡像を回転で作れるため S/Z と J/L は同一形状になり、代わりに立体形（三又・右ねじ・左ねじ）が加わって全8種
-- **段階解禁** — 最初は平面5種のみ。レベル3で三又、レベル5でねじ2種が加わります
-- **奥行きの視認補助** — ゴーストピース・柱ライン・床ハイライト・方位インジケータ。3Dで一番難しい「どこに落ちるか」を読めるようにしています
-- **アイテム** — `B` で盤面に最も多い色のブロックを一掃。詰みかけた局面を立て直せます
+![Gameplay](docs/screenshot.png)
 
-## 操作方法
+## Features
 
-| キー | 動作 |
+- **Four viewpoints** — `Q` / `E` turn the camera by 90°. The board never moves, only the camera. Movement keys are remapped to match, so `→` always moves the piece to the right *on screen*
+- **Eight tetracubes** — in 3D you can flip a piece over, so S/Z and J/L collapse into single shapes. Three non-planar pieces (Tripod, R-Screw, L-Screw) take their place
+- **Gradual unlocks** — you start with the five flat pieces. The Tripod appears at level 3, the two screws at level 5
+- **Depth cues** — ghost piece, column lines, floor highlight and a compass. Reading *where a piece will land* is the hard part of 3D Tetris, so these are treated as required features rather than polish
+- **Rescue item** — `B` clears every block of the most common color and lets the stack collapse, so a bad board is recoverable
+
+## Controls
+
+| Key | Action |
 |---|---|
-| `←` `→` | 画面の左右へ移動 |
-| `↑` `↓` | 画面の奥・手前へ移動 |
-| `A` / `D` | ヨー回転（縦軸まわり） |
-| `W` / `S` | ピッチ回転 |
-| `Z` / `X` | ロール回転 |
-| `Q` / `E` | 視点を 90° 回す |
-| `/` | ソフトドロップ |
-| `Space` | ハードドロップ |
-| `Tab` | ホールド（入れ替え・1ピースにつき1回） |
-| `B` | アイテム（最も多い色を消す） |
-| `P` | ポーズ |
-| `R` | リスタート |
+| `←` `→` | Move left / right on screen |
+| `↑` `↓` | Move away from / toward the camera |
+| `A` / `D` | Yaw (rotate around the vertical axis) |
+| `W` / `S` | Pitch |
+| `Z` / `X` | Roll |
+| `Q` / `E` | Turn the camera 90° |
+| `/` | Soft drop |
+| `Space` | Hard drop |
+| `Tab` | Hold (swaps with the current piece, once per piece) |
+| `B` | Item — clear the most common color |
+| `P` | Pause |
+| `R` | Restart |
 
-## 動かし方
+Pitch and roll are resolved against the camera, so `W` always tips the piece away from you
+no matter which side you are viewing from.
+
+## Rules
+
+- A **horizontal layer clears when all 16 of its cells are filled**, and everything above it falls
+- Clearing several layers at once is worth more (100 / 300 / 700 / 1500 × level)
+- The level goes up every 10 cleared layers, and pieces fall a little faster
+- Stacking above the visible height of 12 ends the game
+
+![Game over](docs/gameover.png)
+
+## Running locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173 が開きます
+npm run dev      # opens http://localhost:5173
 ```
 
 ```bash
-npm test         # ユニットテスト
+npm test         # unit tests
 npm run typecheck
-npm run build    # dist/ に出力
+npm run build    # outputs to dist/
 ```
 
-3Dの見た目はユニットテストでは検証できないので、ヘッドレスブラウザで撮影するスクリプトを用意しています。
-`npm run dev` を起動した状態で実行してください。
+3D appearance cannot be covered by unit tests, so there is a script that drives the game in a
+headless browser and takes a screenshot. Start `npm run dev` first.
 
 ```bash
 npm run shot
 npm run shot -- --keys "ArrowLeft,ArrowLeft,Space" --width 1000 --height 700
 ```
 
-## ルール
-
-- 高さ方向の**1層（4×4 = 16セル）がすべて埋まると消えて**、上の層が落ちてきます
-- 同時に消した層が多いほど高得点（100 / 300 / 700 / 1500 × レベル）
-- 累計10層ごとにレベルが上がり、落下が少しずつ速くなります
-- 可視領域（高さ12）を超えて積み上がるとゲームオーバー
-
-![ゲームオーバー](docs/gameover.png)
-
-## 構成
+## Layout
 
 ```
 src/
-  core/     ゲームロジック（Three.js に依存しない。Node 上でテストできる）
-  render/   Three.js による描画
-  input/    キー入力と画面基準への変換
-tests/      ユニットテスト
+  core/     game rules — imports nothing from Three.js, runs under Node
+  render/   Three.js rendering
+  input/    keyboard handling and screen-relative mapping
+tests/      unit tests
 ```
 
-**ロジックと描画を完全に分離**しています。`core/` は Three.js を一切 import しないため、
-ルールのバグと描画のバグを切り分けられます。3D は目視デバッグが難しいので、この分離が効きます。
+**Rules and rendering are kept completely separate.** `core/` never imports Three.js, so the
+whole rule set can be tested under Node and a rule bug can never hide behind a rendering bug.
+That separation matters here because 3D is awkward to debug by eye.
 
-設計の詳細と、なぜその実装にしたのかは [DESIGN.md](DESIGN.md) に書いてあります。
+`core/` also owns the piece geometry. Each piece rotates inside an n×n×n box where the 90°
+rotations are exact integer permutations, so repeated rotation can never accumulate drift.
+The box edge is 3 or 4 depending on the piece, chosen so its parity matches the piece's own
+extents — the same reason 2D SRS uses a 3×3 box for T/L/J/S/Z and a 4×4 box for I/O.
 
-## 技術構成
+[DESIGN.md](DESIGN.md) records the design decisions and the reasoning behind them,
+including several that were revised after playing. **It is written in Japanese.**
+
+## Built with
 
 TypeScript / Three.js / Vite / Vitest
 
-## ライセンス
+## License
 
 [MIT](LICENSE)
