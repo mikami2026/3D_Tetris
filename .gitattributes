@@ -1,0 +1,4 @@
+# 改行コードはリポジトリ内で LF に統一する。
+# Windows から push したものを Mac/Linux で clone しても差分が出ないようにするため。
+* text=auto eol=lf
+*.png -text

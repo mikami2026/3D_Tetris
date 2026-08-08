@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Tetris</title>
+    <style>
+      :root {
+        --fg: #e6e8f0;
+        --dim: #8b93a7;
+        --panel: rgba(14, 18, 28, 0.72);
+        --line: rgba(90, 102, 128, 0.35);
+        --accent: #22d3ee;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0d14;
+        color: var(--fg);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+      }
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+      .panel {
+        position: fixed;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px 14px;
+        pointer-events: none;
+        line-height: 1.7;
+        backdrop-filter: blur(4px);
+      }
+      #stats {
+        top: 16px;
+        left: 16px;
+        min-width: 168px;
+      }
+      #stats .value {
+        color: var(--accent);
+      }
+      #stats .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      #stats hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 8px 0;
+      }
+      #stats .banner {
+        color: #fbbf24;
+        font-weight: bold;
+      }
+      #help {
+        top: 16px;
+        right: 16px;
+        color: var(--dim);
+      }
+      #help b {
+        color: var(--fg);
+        display: inline-block;
+        min-width: 84px;
+      }
+      #help .section {
+        color: var(--fg);
+        margin-top: 8px;
+        border-top: 1px solid var(--line);
+        padding-top: 8px;
+      }
+      #help .section:first-child {
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+      }
+      /* プレビューは canvas を透かして見せるので、背景を敷かない。 */
+      #preview {
+        position: fixed;
+        right: 16px;
+        top: 336px;
+        pointer-events: none;
+      }
+      #preview .slot {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+      #preview .tag {
+        width: 46px;
+        text-align: right;
+        color: var(--dim);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+      }
+      #preview .box {
+        width: 104px;
+        height: 68px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      #preview .slot.small .box {
+        width: 78px;
+        height: 52px;
+        opacity: 0.75;
+      }
+      /* ピースを置くまで再ホールドできないことを枠で示す */
+      #preview .slot.locked .box {
+        border-style: dashed;
+        border-color: rgba(90, 102, 128, 0.2);
+      }
+      #preview .slot.locked .tag {
+        opacity: 0.4;
+      }
+      /* ゲームオーバー表示。ラクダの窓は canvas を透かすので背景を敷かない。 */
+      #gameover {
+        position: fixed;
+        left: 40px;
+        top: 52%;
+        transform: translateY(-50%);
+        width: 420px;
+        text-align: center;
+        pointer-events: none;
+        display: none;
+      }
+      #gameover.show {
+        display: block;
+      }
+      #gameover .camel {
+        width: 420px;
+        height: 265px;
+        margin-bottom: 4px;
+      }
+      #gameover .title {
+        font-size: 54px;
+        font-weight: bold;
+        letter-spacing: 0.06em;
+        color: #f87171;
+        text-shadow: 0 3px 16px rgba(0, 0, 0, 0.9);
+      }
+      #gameover .sub {
+        margin-top: 10px;
+        font-size: 22px;
+        color: var(--fg);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      }
+      #gameover .sub b {
+        display: inline-block;
+        min-width: 34px;
+        padding: 2px 10px;
+        margin-right: 8px;
+        border: 2px solid var(--accent);
+        border-radius: 6px;
+        color: var(--accent);
+      }
+      /* 画面が狭いとゲームオーバー表示がピットに被るので縮める */
+      @media (max-width: 1100px) {
+        #gameover {
+          left: 24px;
+          width: 320px;
+        }
+        #gameover .camel {
+          width: 320px;
+          height: 200px;
+        }
+        #gameover .title {
+          font-size: 40px;
+        }
+        #gameover .sub {
+          font-size: 18px;
+        }
+      }
+      /* ゲームオーバー中は方位を見る必要がないので、場所を譲る */
+      body.over .compass {
+        display: none;
+      }
+      .compass {
+        position: fixed;
+        left: 16px;
+        bottom: 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        pointer-events: none;
+      }
+      .compass-label {
+        margin-top: 2px;
+        color: var(--accent);
+        letter-spacing: 0.08em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="stats" class="panel"></div>
+    <div id="help" class="panel">
+      <div class="section">
+        <b>← → ↑ ↓</b>移動（画面基準）<br />
+        <b>/</b>ソフトドロップ<br />
+        <b>Space</b>ハードドロップ
+      </div>
+      <div class="section">
+        <b>A / D</b>ヨー回転<br />
+        <b>W / S</b>ピッチ回転<br />
+        <b>Z / X</b>ロール回転
+      </div>
+      <div class="section">
+        <b>Q / E</b>視点を90°回す<br />
+        <b>Tab</b>ホールド（入れ替え・1ピース1回）<br />
+        <b>B</b>アイテム（最多色を消す）<br />
+        <b>P</b>ポーズ<br />
+        <b>R</b>リスタート
+      </div>
+    </div>
+    <div id="gameover">
+      <div class="camel" id="camel-box"></div>
+      <div class="title">GAME OVER</div>
+      <div class="sub"><b>R</b> でリスタート</div>
+    </div>
+    <div id="preview">
+      <div class="slot"><span class="tag">HOLD</span><div class="box" id="slot-hold"></div></div>
+      <div class="slot"><span class="tag">NEXT</span><div class="box" id="slot-next0"></div></div>
+      <div class="slot small"><span class="tag"></span><div class="box" id="slot-next1"></div></div>
+      <div class="slot small"><span class="tag"></span><div class="box" id="slot-next2"></div></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
