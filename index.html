@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -66,7 +66,7 @@
       #help b {
         color: var(--fg);
         display: inline-block;
-        min-width: 84px;
+        min-width: 92px;
       }
       #help .section {
         color: var(--fg);
@@ -155,7 +155,7 @@
         display: inline-block;
         min-width: 34px;
         padding: 2px 10px;
-        margin-right: 8px;
+        margin: 0 8px;
         border: 2px solid var(--accent);
         border-radius: 6px;
         color: var(--accent);
@@ -204,27 +204,27 @@
     <div id="stats" class="panel"></div>
     <div id="help" class="panel">
       <div class="section">
-        <b>← → ↑ ↓</b>移動（画面基準）<br />
-        <b>/</b>ソフトドロップ<br />
-        <b>Space</b>ハードドロップ
+        <b>← → ↑ ↓</b>Move (screen-relative)<br />
+        <b>/</b>Soft drop<br />
+        <b>Space</b>Hard drop
       </div>
       <div class="section">
-        <b>A / D</b>ヨー回転<br />
-        <b>W / S</b>ピッチ回転<br />
-        <b>Z / X</b>ロール回転
+        <b>A / D</b>Yaw<br />
+        <b>W / S</b>Pitch<br />
+        <b>Z / X</b>Roll
       </div>
       <div class="section">
-        <b>Q / E</b>視点を90°回す<br />
-        <b>Tab</b>ホールド（入れ替え・1ピース1回）<br />
-        <b>B</b>アイテム（最多色を消す）<br />
-        <b>P</b>ポーズ<br />
-        <b>R</b>リスタート
+        <b>Q / E</b>Turn view 90°<br />
+        <b>Tab</b>Hold (swap, once per piece)<br />
+        <b>B</b>Item (clear most common color)<br />
+        <b>P</b>Pause<br />
+        <b>R</b>Restart
       </div>
     </div>
     <div id="gameover">
       <div class="camel" id="camel-box"></div>
       <div class="title">GAME OVER</div>
-      <div class="sub"><b>R</b> でリスタート</div>
+      <div class="sub">Press <b>R</b> to restart</div>
     </div>
     <div id="preview">
       <div class="slot"><span class="tag">HOLD</span><div class="box" id="slot-hold"></div></div>

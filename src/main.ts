@@ -99,13 +99,13 @@ const handlers: InputHandlers = {
     if (paused) return;
     // 効かなかった理由を出さないと「壊れている」と受け取られる。
     if (!game.hold() && game.phase === 'falling') {
-      showNotice('ホールドはピースを置くまで1回だけ', 1800);
+      showNotice('Hold: once per piece', 1800);
     }
   },
   useItem() {
     if (paused) return;
     if (!game.useItem() && game.phase === 'falling') {
-      showNotice(game.items === 0 ? 'アイテムがありません' : '消せるブロックがありません', 1800);
+      showNotice(game.items === 0 ? 'No items left' : 'Nothing to clear', 1800);
     }
   },
   togglePause() {
@@ -132,14 +132,15 @@ const label = (id: string | null): string =>
 function updateStats(dt: number): void {
   for (const event of game.drainEvents()) {
     if (event.type === 'clear') {
-      showNotice(`${event.layers.length} レイヤー消去 +${event.gained}`, 2500);
+      const plural = event.layers.length === 1 ? 'layer' : 'layers';
+      showNotice(`${event.layers.length} ${plural} cleared  +${event.gained}`, 2500);
     } else if (event.type === 'levelup') {
       const unlocked = unlockedAtLevel(event.level);
       if (unlocked.length > 0) {
-        showNotice(`新しいピース: ${unlocked.map(label).join(' / ')}`, 5000);
+        showNotice(`New piece: ${unlocked.map(label).join(' / ')}`, 5000);
       }
     } else if (event.type === 'item-used') {
-      showNotice(`${label(event.id)} のブロックを ${event.removed} 個消去`, 2500);
+      showNotice(`Cleared ${event.removed} ${label(event.id)} blocks`, 2500);
     }
   }
 
@@ -152,7 +153,7 @@ function updateStats(dt: number): void {
   const upcoming = nextUnlock(game.level);
   // ゲームオーバーは左側の大きな表示が担当するので、ここには出さない。
   const banner = paused
-    ? '<div class="banner">PAUSED — P で再開</div>'
+    ? '<div class="banner">PAUSED — press P to resume</div>'
     : notice
       ? `<div class="banner">${notice}</div>`
       : '';
@@ -166,7 +167,7 @@ function updateStats(dt: number): void {
     row('NOW', label(game.activeId)),
     '<hr>',
     row('VIEW', DIR_LABELS[stage.rig.viewDir]),
-    upcoming ? row('解禁', `Lv${upcoming.level} ${upcoming.ids.map(label).join('/')}`) : '',
+    upcoming ? row('UNLOCK', `Lv${upcoming.level} ${upcoming.ids.map(label).join('/')}`) : '',
     banner,
   ].join('');
 }

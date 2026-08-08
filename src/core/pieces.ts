@@ -158,14 +158,14 @@ export const PIECES: Record<PieceId, PieceDef> = Object.fromEntries(
   PIECE_IDS.map((id) => [id, build(id)]),
 ) as Record<PieceId, PieceDef>;
 
-/** 画面表示用の名前。立体3種は英字IDだと形が想像できないので和名にする。 */
+/** 画面表示用の名前。立体3種は SCREW_R のような内部IDのままだと読みにくいので整える。 */
 export const PIECE_LABELS: Record<PieceId, string> = {
   I: 'I',
   O: 'O',
   L: 'L',
   T: 'T',
   S: 'S',
-  TRIPOD: '三又',
-  SCREW_R: '右ねじ',
-  SCREW_L: '左ねじ',
+  TRIPOD: 'Tripod',
+  SCREW_R: 'R-Screw',
+  SCREW_L: 'L-Screw',
 };
