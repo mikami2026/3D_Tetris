@@ -1,6 +1,6 @@
 # 3D Tetris
 
-**[▶ Play in your browser](https://mikami2026.github.io/3D_Tetris/)**
+**[▶ Play in your browser](https://mikami2026.github.io/3D_Tetris/)** — desktop only, a keyboard is required.
 
 A 3D falling-block puzzle. Pieces made of four cubes drop into a tall pit with a 4×4 floor.
 You can **turn the camera 90° at a time to inspect the board from all four sides**, and the
@@ -37,6 +37,15 @@ controls always follow whichever direction you are currently looking from.
 
 Pitch and roll are resolved against the camera, so `W` always tips the piece away from you
 no matter which side you are viewing from.
+
+## Requirements
+
+- A desktop browser with WebGL 2 — current Chrome, Edge, Firefox or Safari
+- **A keyboard.** Rotating in three axes needs six keys, so phones and tablets cannot play this yet
+- A window of roughly 1024×640 or larger
+
+Keys are read by physical position rather than by printed label, so `WASD` sits in the same
+place on every layout. On AZERTY keyboards the labels will not match the help panel.
 
 ## Rules
 
